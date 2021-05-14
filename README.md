@@ -69,7 +69,8 @@ The producer can send a set of messages in a single publish request.
 - Pull requests created by a consumer consists of offset of the starting message and a number of bytes to fetch.
 - A consumer will recieves a buffer of data read for the application to consume.
 - A consumer computes the offset of the next message and uses it in the next pull request. (The concept of offset and id, which is mentioned above, are interchangeable)
-- EAch pull request retrieves multiple messages up to a certain size
+- Each pull request retrieves multiple messages up to a certain size
+![pull request](https://user-images.githubusercontent.com/59812671/118338657-8c4ab880-b4cb-11eb-9843-adc9325230c3.png)
 ####  A broker locates the segment file
 - Each broker has a sorted list of offsets
 - A broker searches the offset list and find the location of the segment file of the requested message and send ti back to the consumer.
