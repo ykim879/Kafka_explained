@@ -137,3 +137,15 @@ Each consumer group associated with an offset register.
 Contains: 
  - An offset of the last consumed message in a partition for each subscribed partition
  The paths are persistent for the offset registery.
+---
+## Delivery Guarantees
+### Failed consumer recovery
+When a consumer process crashes without a clean shutdown, it may get duplicates. If an application cares about duplicate, it must add its own deduplication logic.
+### Log corruption
+To guarantee on the cordering of meesages from a single partiton (avoid confusion by the orderings of other partitions), Kafka stores a CRC for each message in log. CRC allows to check network errors after message is produced or consumed.
+### Failed Brokers
+If a broker goes down, any message stored on it not yet consumed becomes unavailable. If the storage system on a broker is permanently damaged, any unconsumed message is lost forever
+
+---
+## Reference
+Kreps, J., Narkhede, N., & Rao, J. (2011, June). Kafka: A distributed messaging system for log processing. In _Proceedings of the NetDB_ (Vol. 11, pp. 1-7).
