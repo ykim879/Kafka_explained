@@ -105,37 +105,35 @@ The information about how much each consumer has consumed is maintained by consu
 - **Note**: To truely balance the load, we need many more partitions in a topic than the consumers in each group.
 ### Second deicison: Let comsumers coordinate among themselves without a master node by employing consensus service Zookeeper.
 Zookeeper provides following services:
-
-  (1) Register a watcher on a path and get notified when the children of a path or the value of a path has changed.
-  (2) A path can be created as ephemeral which automatically remove a path by the Zookeeper server when the client is gone.
-  (3) zookeeper replicates its data to multiple servers.
+- Register a watcher on a path and get notified when the children of a path or the value of a path has changed.
+- A path can be created as ephemeral which automatically remove a path by the Zookeeper server when the client is gone.
+- Zookeeper replicates its data to multiple servers.
   
 By using Zookeeper Kafka can easily:
-
-  (1) Detect the addition and the removal of brokers and consumers.
-  (2) Trigger a rebalance process in each consumer when the addition and removal happens.
-  (3) Maintain the consumption relationship and keep track of the consumed offset of each partition. 
+- Detect the addition and the removal of brokers and consumers.
+- Trigger a rebalance process in each consumer when the addition and removal happens.
+- Maintain the consumption relationship and keep track of the consumed offset of each partition. 
   
 #### Registries in Zookeeper
 When each broker or consumer starts up, it stores its information in a broker or consumer registry in Zookeeper.
 ##### Broker registry
 Contains:
-  (1) the broker’s host name
-  (2) the broker’s host port 
-  (3) A set of topics and partitions that is being stored
+- The broker’s host name
+- The broker’s host port 
+- A set of topics and partitions that is being stored
  The paths are ephermeral for the broker registery.
 ##### Consumer registery
 Contains:
-  (1) The consumer group it belongs to
-  (2) Set of topics that it subscribes to
+- The consumer group it belongs to
+- Set of topics that it subscribes to
  The paths are ephermeral for the consumer registery.
 ##### Ownership registery
 Each consumer group associated with an ownership register.
 Contains:
-  (1) A path for each subscribed partition (id of consumer current consuming)
+- A path for each subscribed partition (id of consumer current consuming)
  The paths are ephermeral for the owndership registery.
 ##### Offset registery
 Each consumer group associated with an offset register.
 Contains: 
-  (1) offset of the last consumed message in a partition for each subscribed partition
+ - An offset of the last consumed message in a partition for each subscribed partition
  The paths are persistent for the offset registery.
