@@ -34,6 +34,9 @@ Then, each broker stores one or more of these partitions. (The concept of broker
 A **publisher** is an entity that publishes the messages to a topic.
 #### Consumers
 A **consumer** is an entity that subscribes topic from the brokers by pulling the data.
+##### Consumer groups
+A **consumer group** is a set of consumers (either one or more) that jointily consume a set of subscribed topics.
+(Cosumers in the same group can be in different processes or on different machines.)
 #### Messages
 A **message** is a data that is consisited of the content, payload, and additional data.
 The Kafka message doesn't have explicit message id but addressed by logical offset in the log. This avoids the overhead. Therefore, the id is computed implicity. The next message id is computed by adding the length of the current message to its id. 
@@ -93,3 +96,46 @@ The information about how much each consumer has consumed is maintained by consu
 - Reduces a lot of complexity and the overhead on the broker.
 - A performance doesn't degrade with a larger data.
 - A consumer can rewid back to an old offset and re-consume data.
+---
+## Kafka's Distributed Coordination
+**Challenge**: Divide the messages evenly among the consumers without too much coordination overhead.
+### First decision: All messages from one partition are consumed only by a single consumer within each consumer group.
+- Reducing amount of overhead by eliminimating locking and state maintenance overhead.
+- The overhead is only needed when consuming process requires co-ordinate process to rebalance the load.
+- **Note**: To truely balance the load, we need many more partitions in a topic than the consumers in each group.
+### Second deicison: Let comsumers coordinate among themselves without a master node by employing consensus service Zookeeper.
+Zookeeper provides following services:
+
+  (1) Register a watcher on a path and get notified when the children of a path or the value of a path has changed.
+  (2) A path can be created as ephemeral which automatically remove a path by the Zookeeper server when the client is gone.
+  (3) zookeeper replicates its data to multiple servers.
+  
+By using Zookeeper Kafka can easily:
+
+  (1) Detect the addition and the removal of brokers and consumers.
+  (2) Trigger a rebalance process in each consumer when the addition and removal happens.
+  (3) Maintain the consumption relationship and keep track of the consumed offset of each partition. 
+  
+#### Registries in Zookeeper
+When each broker or consumer starts up, it stores its information in a broker or consumer registry in Zookeeper.
+##### Broker registry
+Contains:
+  (1) the broker’s host name
+  (2) the broker’s host port 
+  (3) A set of topics and partitions that is being stored
+ The paths are ephermeral for the broker registery.
+##### Consumer registery
+Contains:
+  (1) The consumer group it belongs to
+  (2) Set of topics that it subscribes to
+ The paths are ephermeral for the consumer registery.
+##### Ownership registery
+Each consumer group associated with an ownership register.
+Contains:
+  (1) A path for each subscribed partition (id of consumer current consuming)
+ The paths are ephermeral for the owndership registery.
+##### Offset registery
+Each consumer group associated with an offset register.
+Contains: 
+  (1) offset of the last consumed message in a partition for each subscribed partition
+ The paths are persistent for the offset registery.
